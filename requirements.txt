@@ -1,6 +1,6 @@
 pandas
 streamlit
 numpy
-PIL
+Pillow
 pytesseract
 opencv-python
