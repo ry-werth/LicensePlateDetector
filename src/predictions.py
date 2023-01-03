@@ -7,7 +7,7 @@ INPUT_WIDTH = 640
 INPUT_HEIGHT = 640
 
 def get_detections(img,net):
-    # 1.CONVERT IMAGE TO YOLO FORMAT
+    # 1.Turn the image insto a square using whatever is greater, the width or height
     image = img.copy()
     row, col, d = image.shape
 
@@ -15,7 +15,7 @@ def get_detections(img,net):
     input_image = np.zeros((max_rc,max_rc,3),dtype=np.uint8)
     input_image[0:row,0:col] = image
 
-    # 2. GET PREDICTION FROM YOLO MODEL
+    # 2. Resize and get predictions from model
     blob = cv2.dnn.blobFromImage(input_image,1/255,(INPUT_WIDTH,INPUT_HEIGHT),swapRB=True,crop=False)
     net.setInput(blob)
     preds = net.forward()
@@ -25,7 +25,7 @@ def get_detections(img,net):
 
 def non_maximum_supression(input_image,detections):
     
-    # 3. FILTER DETECTIONS BASED ON CONFIDENCE AND PROBABILIY SCORE
+    # 3. Filter based on confidence
     
     # center x, center y, w , h, conf, proba
     boxes = []
@@ -56,8 +56,10 @@ def non_maximum_supression(input_image,detections):
     boxes_np = np.array(boxes).tolist()
     confidences_np = np.array(confidences).tolist()
     
-    # 4.2 NMS
+    # 4.2 Non maximum suppresion (combine the overlapping boxes into one)
     index = cv2.dnn.NMSBoxes(boxes_np,confidences_np,0.25,0.45)
+
+    print(len(boxes_np), len(index))
     
     return boxes_np, confidences_np, index
 
@@ -94,8 +96,8 @@ def drawings(image,boxes_np,confidences_np,index):
             highest_conf_plate_image = license_text_img
 
 
-        cv2.rectangle(image,(x,y),(x+w,y+h),(255,0,255),2)
-        cv2.rectangle(image,(x,y-40),(x+w,y),(255,0,255),-1)
+        cv2.rectangle(image,(x,y),(x+w,y+h),(255,153,51),2)
+        cv2.rectangle(image,(x,y-40),(x+w,y),(255,153,51),-1)
         cv2.rectangle(image,(x,y+h),(x+w,y+h+40),(0,0,0),-1)
 
 
@@ -103,3 +105,12 @@ def drawings(image,boxes_np,confidences_np,index):
         cv2.putText(image,license_text,(x,y+h+27),cv2.FONT_HERSHEY_SIMPLEX,1,(255,255,255),2)
 
     return {"full_image":image, "plate_img": highest_conf_plate_image, "text": highest_conf_plate_text, "conf": highest_conf}
+
+def yolo_predictions(img,net):
+    # step-1: detections
+    input_image, detections = get_detections(img,net)
+    # step-2: NMS
+    boxes_np, confidences_np, index = non_maximum_supression(input_image, detections)
+    # step-3: Drawings
+    final_dict = drawings(img,boxes_np,confidences_np,index)
+    return final_dict

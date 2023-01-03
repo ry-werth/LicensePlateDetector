@@ -1,12 +1,10 @@
 import streamlit as st
-import pandas as pd
-import numpy as np
 import PIL.Image
 import PIL.ImageOps
 from io import BytesIO
-import cv2
-from src.predictions import get_detections, non_maximum_supression, drawings
+from src.predictions import yolo_predictions
 from src.image_load import transform_image
+from src.model_load import load_model
 
 
 def load_image(uploaded_file, col1):
@@ -19,23 +17,6 @@ def load_image(uploaded_file, col1):
         return np_img
     else:
         return None
-
-def load_model(model_path):
-    #model = torch.load(model_path, map_location='cpu')
-    net = cv2.dnn.readNetFromONNX(model_path)
-    net.setPreferableBackend(cv2.dnn.DNN_BACKEND_OPENCV)
-    net.setPreferableTarget(cv2.dnn.DNN_TARGET_CPU)
-
-    return net
-
-def yolo_predictions(img,net):
-    # step-1: detections
-    input_image, detections = get_detections(img,net)
-    # step-2: NMS
-    boxes_np, confidences_np, index = non_maximum_supression(input_image, detections)
-    # step-3: Drawings
-    final_dict = drawings(img,boxes_np,confidences_np,index)
-    return final_dict
 
 
 def main():
