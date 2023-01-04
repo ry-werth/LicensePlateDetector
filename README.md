@@ -31,4 +31,9 @@ Surprisingly the most fickle part of this project is the text extraction. I didn
 
 I thought the model would be the hard part and the text extraction would be simple. However, in reality I found it to be the opposite case. 
 
-
+# Repo
+- [Training Notebook](./models/training_files) I ran this in Google Colab and accessed my training data from my Google Drive 
+- [Weights](./models/weights)
+- [Main Streamlit App File](./blob/main/app.py)
+- [Additional Streamlit pages](./pages)
+- [Streamlit APP Helper Functions](./src)
